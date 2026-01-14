@@ -1,8 +1,15 @@
 import { z } from "zod"
 import type { FilePart } from "@opencode-ai/sdk"
 
-type Metadata = {
+export type Metadata = {
   [key: string]: any
+}
+
+export type AskInput<M extends Metadata = Metadata> = {
+  permission: string
+  patterns: string[]
+  always: string[]
+  metadata: M
 }
 
 export type ToolContext<M extends Metadata = Metadata> = {
@@ -10,15 +17,10 @@ export type ToolContext<M extends Metadata = Metadata> = {
   messageID: string
   agent: string
   abort: AbortSignal
-  metadata(input: { title?: string; metadata?: Metadata }): void
-  ask(input: AskInput): Promise<void>
-}
-
-type AskInput = {
-  permission: string
-  patterns: string[]
-  always: string[]
-  metadata: Metadata
+  callID?: string
+  extra?: M
+  metadata(input: { title?: string; metadata?: M }): void
+  ask(input: AskInput<M>): Promise<void>
 }
 
 export type ExecuteResult<M extends Metadata = Metadata> = {
@@ -28,7 +30,6 @@ export type ExecuteResult<M extends Metadata = Metadata> = {
   attachments?: FilePart[]
 }
 
-// NB: align with ReturnType<Info['init']> in packages/opencode/src/tool/tool.ts
 export type Input<Args extends z.ZodRawShape, M extends Metadata = Metadata> = {
   description: string
   args: Args
