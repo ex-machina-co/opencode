@@ -587,7 +587,6 @@ export type QuestionInfo = {
 }
 
 export type QuestionRequest = {
-  id: string
   sessionID: string
   /**
    * Questions to ask
@@ -597,6 +596,7 @@ export type QuestionRequest = {
     messageID: string
     callID: string
   }
+  id: string
 }
 
 export type EventQuestionAsked = {
@@ -2027,6 +2027,18 @@ export type SubtaskPartInput = {
     modelID: string
   }
   command?: string
+}
+
+export type QuestionAskInput = {
+  sessionID: string
+  /**
+   * Questions to ask
+   */
+  questions: Array<QuestionInfo>
+  tool?: {
+    messageID: string
+    callID: string
+  }
 }
 
 export type ProviderAuthMethod = {
@@ -3865,6 +3877,39 @@ export type QuestionListResponses = {
 }
 
 export type QuestionListResponse = QuestionListResponses[keyof QuestionListResponses]
+
+export type QuestionAskData = {
+  body?: QuestionAskInput
+  path?: never
+  query?: {
+    directory?: string
+  }
+  url: "/question/ask"
+}
+
+export type QuestionAskErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type QuestionAskError = QuestionAskErrors[keyof QuestionAskErrors]
+
+export type QuestionAskResponses = {
+  /**
+   * Created question request
+   */
+  200: {
+    id: string
+  }
+}
+
+export type QuestionAskResponse = QuestionAskResponses[keyof QuestionAskResponses]
 
 export type QuestionReplyData = {
   body?: {

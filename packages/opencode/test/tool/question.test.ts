@@ -19,7 +19,7 @@ describe("tool.question", () => {
 
   beforeEach(() => {
     askSpy = spyOn(QuestionModule.Question, "ask").mockImplementation(async () => {
-      return []
+      return [] as any
     })
   })
 
