@@ -5,13 +5,6 @@ export type Metadata = {
   [key: string]: any
 }
 
-export type AskInput<M extends Metadata = Metadata> = {
-  permission: string
-  patterns: string[]
-  always: string[]
-  metadata: M
-}
-
 export type ToolContext<M extends Metadata = Metadata> = {
   sessionID: string
   messageID: string
@@ -21,6 +14,13 @@ export type ToolContext<M extends Metadata = Metadata> = {
   extra?: M
   metadata(input: { title?: string; metadata?: M }): void
   ask(input: AskInput<M>): Promise<void>
+}
+
+export type AskInput<M extends Metadata = Metadata> = {
+  permission: string
+  patterns: string[]
+  always: string[]
+  metadata: M
 }
 
 export type ExecuteResult<M extends Metadata = Metadata> = {
