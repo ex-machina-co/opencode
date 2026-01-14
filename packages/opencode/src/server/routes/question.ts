@@ -5,6 +5,7 @@ import { Question } from "../../question"
 import z from "zod"
 import { errors } from "../error"
 import { lazy } from "../../util/lazy"
+import { Session } from "../../session"
 
 export const QuestionRoutes = lazy(() =>
   new Hono()
@@ -28,6 +29,32 @@ export const QuestionRoutes = lazy(() =>
       async (c) => {
         const questions = await Question.list()
         return c.json(questions)
+      },
+    )
+    .post(
+      "/ask",
+      describeRoute({
+        summary: "Ask a question",
+        description: "Ask a question to the AI assistant.",
+        operationId: "question.ask",
+        responses: {
+          200: {
+            description: "Created question request",
+            content: {
+              "application/json": {
+                schema: resolver(Question.Request.pick({ id: true })),
+              },
+            },
+          },
+          ...errors(400, 404),
+        },
+      }),
+      validator("json", Question.AskInput),
+      async (c) => {
+        const json = c.req.valid("json")
+        await Session.get(json.sessionID)
+        const id = await Question.ask(json, { awaitAnswers: false })
+        return c.json({ id })
       },
     )
     .post(

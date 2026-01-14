@@ -31,21 +31,25 @@ export namespace Question {
     })
   export type Info = z.infer<typeof Info>
 
-  export const Request = z
-    .object({
-      id: Identifier.schema("question"),
-      sessionID: Identifier.schema("session"),
-      questions: z.array(Info).describe("Questions to ask"),
-      tool: z
-        .object({
-          messageID: z.string(),
-          callID: z.string(),
-        })
-        .optional(),
-    })
-    .meta({
-      ref: "QuestionRequest",
-    })
+  export const AskInput = z.object({
+    sessionID: Identifier.schema("session"),
+    questions: z.array(Info).describe("Questions to ask"),
+    tool: z
+      .object({
+        messageID: z.string(),
+        callID: z.string(),
+      })
+      .optional(),
+  }).meta({
+    ref: 'QuestionAskInput'
+  })
+  export type AskInput = z.infer<typeof AskInput>
+
+  export const Request = AskInput.safeExtend({
+    id: Identifier.schema("question"),
+  }).meta({
+    ref: "QuestionRequest",
+  })
   export type Request = z.infer<typeof Request>
 
   export const Answer = z.array(z.string()).meta({
@@ -94,17 +98,17 @@ export namespace Question {
     }
   })
 
-  export async function ask(input: {
-    sessionID: string
-    questions: Info[]
-    tool?: { messageID: string; callID: string }
-  }): Promise<Answer[]> {
+  export async function ask<T extends boolean = true>(
+    input: AskInput,
+    options?: { awaitAnswers: T }
+  ) {
+    const { awaitAnswers } = options ?? { awaitAnswers: true }
     const s = await state()
     const id = Identifier.ascending("question")
 
     log.info("asking", { id, questions: input.questions.length })
 
-    return new Promise<Answer[]>((resolve, reject) => {
+    const answerPromise = new Promise<Answer[]>((resolve, reject) => {
       const info: Request = {
         id,
         sessionID: input.sessionID,
@@ -118,6 +122,8 @@ export namespace Question {
       }
       Bus.publish(Event.Asked, info)
     })
+
+    return (awaitAnswers ? answerPromise : id) as T extends true ? typeof answerPromise : typeof id
   }
 
   export async function reply(input: { requestID: string; answers: Answer[] }): Promise<void> {
