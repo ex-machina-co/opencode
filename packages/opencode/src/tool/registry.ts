@@ -68,15 +68,21 @@ export namespace ToolRegistry {
         execute: async (args, ctx) => {
           const result = await def.execute(args as any, ctx)
 
-          if (typeof result !== 'string') {
-            return result
+          const isString = typeof result === 'string'
+          const output = isString ? result : result.output
+
+          const truncatedOut = await Truncate.output(output, {}, initCtx?.agent)
+          const title = isString ? "" : result.title ?? ""
+          const metadata = {
+            ...(isString ? {} : (result.metadata ?? {})),
+            truncated: truncatedOut.truncated,
+            outputPath: truncatedOut.truncated ? truncatedOut.outputPath : undefined,
           }
 
-          const out = await Truncate.output(result, {}, initCtx?.agent)
           return {
-            title: "",
-            output: out.truncated ? out.content : result,
-            metadata: { truncated: out.truncated, outputPath: out.truncated ? out.outputPath : undefined },
+            title,
+            metadata,
+            output: truncatedOut.truncated ? truncatedOut.content : output,
           }
         },
       }),
