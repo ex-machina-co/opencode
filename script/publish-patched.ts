@@ -1,10 +1,21 @@
 #!/usr/bin/env bun
 
 /**
- * Publish patched @ex-machina/opencode-sdk and @ex-machina/opencode-plugin packages
+ * Publish patched @ex-machina packages:
+ * - @ex-machina/opencode-sdk
+ * - @ex-machina/opencode-plugin
+ * - @ex-machina/opencode (CLI)
+ * - @ex-machina/opencode-darwin-arm64 (CLI binary)
  *
  * Reads version from PATCHED_VERSION file in repo root.
  * Usage: bun script/publish-patched.ts
+ *
+ * TODO: Add more CLI platform packages when expanding platform support:
+ * - @ex-machina/opencode-darwin-x64
+ * - @ex-machina/opencode-linux-arm64
+ * - @ex-machina/opencode-linux-x64
+ * - @ex-machina/opencode-windows-x64
+ * - (and baseline/musl variants)
  */
 
 import path from 'path'
@@ -35,9 +46,11 @@ async function versionExists(pkg: string, version: string): Promise<boolean> {
 
 const sdkExists = await versionExists('@ex-machina/opencode-sdk', FULL_VERSION)
 const pluginExists = await versionExists('@ex-machina/opencode-plugin', FULL_VERSION)
+const cliExists = await versionExists('@ex-machina/opencode', FULL_VERSION)
+const cliBinaryExists = await versionExists('@ex-machina/opencode-darwin-arm64', FULL_VERSION)
 
-if (sdkExists && pluginExists) {
-  console.log(`⏭️  Version ${FULL_VERSION} already published for both packages. Skipping.`)
+if (sdkExists && pluginExists && cliExists && cliBinaryExists) {
+  console.log(`⏭️  Version ${FULL_VERSION} already published for all packages. Skipping.`)
   process.exit(0)
 }
 
@@ -155,7 +168,42 @@ if (pluginExists) {
   console.log('\n✅ @ex-machina/opencode-plugin published\n')
 }
 
+// ============ CLI ============
+if (cliExists && cliBinaryExists) {
+  console.log(`⏭️  @ex-machina/opencode@${FULL_VERSION} already exists. Skipping CLI.\n`)
+} else {
+  console.log('=== Building and publishing @ex-machina/opencode CLI ===\n')
+
+  // Build CLI packages
+  process.chdir(ROOT)
+  await $`bun script/build-patched-cli.ts`
+
+  const distCliDir = path.join(ROOT, 'dist-cli')
+
+  // Publish platform binary package first
+  if (cliBinaryExists) {
+    console.log(`⏭️  @ex-machina/opencode-darwin-arm64@${FULL_VERSION} already exists. Skipping.\n`)
+  } else {
+    const binaryDir = path.join(distCliDir, 'opencode-darwin-arm64')
+    process.chdir(binaryDir)
+    await $`npm publish --tag latest --access public`
+    console.log('\n✅ @ex-machina/opencode-darwin-arm64 published\n')
+  }
+
+  // Publish main CLI package
+  if (cliExists) {
+    console.log(`⏭️  @ex-machina/opencode@${FULL_VERSION} already exists. Skipping.\n`)
+  } else {
+    const mainDir = path.join(distCliDir, 'opencode')
+    process.chdir(mainDir)
+    await $`npm publish --tag latest --access public`
+    console.log('\n✅ @ex-machina/opencode published\n')
+  }
+}
+
 console.log(`\n🎉 Done! Published version ${FULL_VERSION}`)
+console.log(`\nTo use the patched CLI:`)
+console.log(`  npm install -g @ex-machina/opencode`)
 console.log(`\nTo use in opencode-orca, update package.json:`)
 console.log(`  "@opencode-ai/plugin": "npm:@ex-machina/opencode-plugin@${FULL_VERSION}",`)
 console.log(`  "@opencode-ai/sdk": "npm:@ex-machina/opencode-sdk@${FULL_VERSION}",`)
