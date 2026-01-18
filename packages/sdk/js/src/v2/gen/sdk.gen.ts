@@ -86,6 +86,9 @@ import type {
   PtyUpdateErrors,
   PtyUpdateResponses,
   QuestionAnswer,
+  QuestionAskErrors,
+  QuestionAskInput,
+  QuestionAskResponses,
   QuestionListResponses,
   QuestionRejectErrors,
   QuestionRejectResponses,
@@ -1771,6 +1774,41 @@ export class Question extends HeyApiClient {
       url: "/question",
       ...options,
       ...params,
+    })
+  }
+
+  /**
+   * Ask a question
+   *
+   * Ask a question to the AI assistant.
+   */
+  public ask<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      questionAskInput?: QuestionAskInput
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { key: "questionAskInput", map: "body" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<QuestionAskResponses, QuestionAskErrors, ThrowOnError>({
+      url: "/question/ask",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
     })
   }
 
