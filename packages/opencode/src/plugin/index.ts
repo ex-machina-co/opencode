@@ -2,7 +2,8 @@ import type { Hooks, PluginInput, Plugin as PluginInstance } from "@opencode-ai/
 import { Config } from "../config/config"
 import { Bus } from "../bus"
 import { Log } from "../util/log"
-import { createOpencodeClient } from "@opencode-ai/sdk"
+import { createOpencodeClient as createV2Client } from "@opencode-ai/sdk/v2"
+import { createOpencodeClient as createV1Client } from "@opencode-ai/sdk"
 import { Server } from "../server/server"
 import { BunProc } from "../bun"
 import { Instance } from "../project/instance"
@@ -21,7 +22,12 @@ export namespace Plugin {
   const INTERNAL_PLUGINS: PluginInstance[] = [CodexAuthPlugin, CopilotAuthPlugin]
 
   const state = Instance.state(async () => {
-    const client = createOpencodeClient({
+    const client = createV1Client({
+      baseUrl: "http://localhost:4096",
+      // @ts-ignore - fetch type incompatibility
+      fetch: async (...args) => Server.App().fetch(...args),
+    })
+    const clientNext = createV2Client({
       baseUrl: "http://localhost:4096",
       // @ts-ignore - fetch type incompatibility
       fetch: async (...args) => Server.App().fetch(...args),
@@ -30,6 +36,7 @@ export namespace Plugin {
     const hooks: Hooks[] = []
     const input: PluginInput = {
       client,
+      clientNext,
       project: Instance.project,
       worktree: Instance.worktree,
       directory: Instance.directory,
@@ -120,7 +127,6 @@ export namespace Plugin {
     const hooks = await state().then((x) => x.hooks)
     const config = await Config.get()
     for (const hook of hooks) {
-      // @ts-expect-error this is because we haven't moved plugin to sdk v2
       await hook.config?.(config)
     }
     Bus.subscribeAll(async (input) => {
