@@ -5,6 +5,7 @@ import { tmpdir } from "../fixture/fixture"
 import { Instance } from "../../src/project/instance"
 import { ToolRegistry } from "../../src/tool/registry"
 import { Tool } from "../../src/tool/tool"
+import { Provider } from "../../src/provider/provider"
 
 describe("tool.registry", () => {
   test("loads tools from .opencode/tool (singular)", async () => {
@@ -53,7 +54,7 @@ describe("tool.registry", () => {
     await Instance.provide({
       directory: tmp.path,
       fn: async () => {
-        const tools = await ToolRegistry.tools('opencode')
+        const tools = await ToolRegistry.tools(await Provider.defaultModel())
         const hello = tools.find((t) => t.id === "hello")
         const goodbye = tools.find((t) => t.id === "goodbye")
 
