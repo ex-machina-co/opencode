@@ -23,7 +23,7 @@ import { $ } from 'bun'
 
 const ROOT = new URL('..', import.meta.url).pathname
 
-// Read version from PATCHED_VERSION file
+// Read the version from the PATCHED_VERSION file
 const versionFile = path.join(ROOT, 'PATCHED_VERSION')
 const FULL_VERSION = (await Bun.file(versionFile).text()).trim()
 
