@@ -61,6 +61,12 @@ if (sdkExists) {
   sdkPkg.name = '@ex-machina/opencode-sdk'
   sdkPkg.version = FULL_VERSION
 
+  // Add repository for provenance verification
+  sdkPkg.repository = {
+    type: 'git',
+    url: 'https://github.com/ex-machina-co/opencode',
+  }
+
   // Update exports to point to dist
   for (const [key, value] of Object.entries(sdkPkg.exports as Record<string, string>)) {
     const file = value.replace('./src/', './dist/').replace('.ts', '')
@@ -108,6 +114,12 @@ if (pluginExists) {
   // Change name and version
   pluginPkg.name = '@ex-machina/opencode-plugin'
   pluginPkg.version = FULL_VERSION
+
+  // Add repository for provenance verification
+  pluginPkg.repository = {
+    type: 'git',
+    url: 'https://github.com/ex-machina-co/opencode',
+  }
 
   // Update exports to point to dist
   for (const [key, value] of Object.entries(pluginPkg.exports as Record<string, string>)) {
