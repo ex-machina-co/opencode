@@ -1119,7 +1119,7 @@ export default function Layout(props: ParentProps) {
               placement="top-start"
               value={props.session.title}
               gutter={0}
-              openDelay={2000}
+              openDelay={3000}
               class="grow-1 min-w-0"
             >
               <InlineEditor
@@ -1627,7 +1627,16 @@ export default function Layout(props: ParentProps) {
                           stopPropagation
                         />
 
-                        <Tooltip placement="right" value={project()?.worktree} class="shrink-0">
+                        <Tooltip
+                          placement={sidebarProps.mobile ? "bottom" : "top"}
+                          gutter={2}
+                          value={project()?.worktree}
+                          class="shrink-0"
+                          contentStyle={{
+                            "max-width": "640px",
+                            transform: "translate3d(52px, 0, 0)",
+                          }}
+                        >
                           <span class="text-12-regular text-text-base truncate">
                             {project()?.worktree.replace(homedir(), "~")}
                           </span>
@@ -1669,7 +1678,7 @@ export default function Layout(props: ParentProps) {
                           <Button
                             size="large"
                             icon="plus-small"
-                            class="w-full max-w-[256px]"
+                            class="w-full"
                             onClick={() => {
                               navigate(`/${base64Encode(p.worktree)}/session`)
                               layout.mobileSidebar.hide()
@@ -1686,7 +1695,7 @@ export default function Layout(props: ParentProps) {
                   >
                     <>
                       <div class="py-4 px-3">
-                        <Button size="large" icon="plus-small" class="w-full max-w-[256px]" onClick={createWorkspace}>
+                        <Button size="large" icon="plus-small" class="w-full" onClick={createWorkspace}>
                           New workspace
                         </Button>
                       </div>
