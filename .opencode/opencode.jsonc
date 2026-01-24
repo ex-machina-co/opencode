@@ -7,17 +7,17 @@
   "instructions": ["STYLE_GUIDE.md"],
   "provider": {
     "opencode": {
-      "options": {},
-    },
+      "options": {}
+    }
   },
   "mcp": {
     "context7": {
       "type": "remote",
-      "url": "https://mcp.context7.com/mcp",
-    },
+      "url": "https://mcp.context7.com/mcp"
+    }
   },
   "tools": {
     "github-triage": false,
-    "github-pr-search": false,
-  },
+    "github-pr-search": false
+  }
 }
