@@ -4,6 +4,11 @@
   "version": "1.1.41",
   "type": "module",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anomalyco/opencode.git",
+    "directory": "packages/plugin"
+  },
   "scripts": {
     "typecheck": "tsgo --noEmit",
     "build": "tsc"
