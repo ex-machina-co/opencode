@@ -1385,11 +1385,11 @@ function ToolPart(props: { last: boolean; part: ToolPart; message: AssistantMess
     get input() {
       return props.part.state.input ?? {}
     },
-    get subagentType() {
-      return this.input.subagent_type ?? this.metadata.subagent_type ?? "unknown"
+    get subagentType(): string {
+      return `${this.input.subagent_type ?? this.metadata.subagent_type ?? "unknown"}`
     },
-    get description() {
-      return this.input.description ?? this.metadata.description ?? ""
+    get description(): string {
+      return `${this.input.description ?? this.metadata.description ?? ""}`
     },
     get output() {
       return props.part.state.status === "completed" ? props.part.state.output : undefined
