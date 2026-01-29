@@ -1805,7 +1805,7 @@ function Task(props: ToolProps<typeof TaskTool>) {
 
   return (
     <Switch>
-      <Match when={props.metadata.summary?.length}>
+      <Match when={props.metadata.summary?.length || props.metadata.sessionId}>
         <BlockTool
           title={"# " + Locale.titlecase(props.subagentType) + " Task"}
           onClick={
