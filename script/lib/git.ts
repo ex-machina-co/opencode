@@ -21,8 +21,8 @@ export async function resetHardTo(ref: string): Promise<void> {
   await $`git reset --hard ${ref}`.quiet()
 }
 
-export async function push(remote: string, branch: string, extra?: string[]): Promise<void> {
-  await $`git push ${remote} ${branch} ${extra?.join(' ') ||''}`
+export async function push(remote: string, branch: string, options?: Partial<Record<'tags' | 'noVerify', boolean>>): Promise<void> {
+  await $`git push ${remote} ${branch} ${options?.tags ? '--tags' : ''} ${options?.noVerify ? '--no-verify' : ''}`
 }
 
 export async function mergeFastForwardOnly(branch: string): Promise<void> {
