@@ -1404,6 +1404,9 @@ function ToolPart(props: { last: boolean; part: ToolPart; message: AssistantMess
   return (
     <Show when={!shouldHide()}>
       <Switch>
+        <Match when={props.part.tool === "task" || (props.metadata.summary && props.metatada.sessionID)}>
+          <Task {...toolprops} />
+        </Match>
         <Match when={props.part.tool === "bash"}>
           <Bash {...toolprops} />
         </Match>
@@ -1433,9 +1436,6 @@ function ToolPart(props: { last: boolean; part: ToolPart; message: AssistantMess
         </Match>
         <Match when={props.part.tool === "edit"}>
           <Edit {...toolprops} />
-        </Match>
-        <Match when={props.part.tool === "task"}>
-          <Task {...toolprops} />
         </Match>
         <Match when={props.part.tool === "apply_patch"}>
           <ApplyPatch {...toolprops} />
