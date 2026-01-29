@@ -1401,10 +1401,12 @@ function ToolPart(props: { last: boolean; part: ToolPart; message: AssistantMess
     },
   }
 
+  const isTask = props.part.tool === "task" || toolprops.metadata.sessionId || toolprops.metadata.summary
+
   return (
     <Show when={!shouldHide()}>
       <Switch>
-        <Match when={props.part.tool === "task" || (props.part.metadata?.summary && props.part.metadata?.sessionID)}>
+        <Match when={isTask}>
           <Task {...toolprops} />
         </Match>
         <Match when={props.part.tool === "bash"}>
