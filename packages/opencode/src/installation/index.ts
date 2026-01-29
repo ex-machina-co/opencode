@@ -205,7 +205,7 @@ export namespace Installation {
         return reg.endsWith("/") ? reg.slice(0, -1) : reg
       })
       const channel = CHANNEL
-      return fetch(`${registry}/@ex-machina%2Fopencode/${channel}`)
+      return fetch(`${registry}/@ex-machina/opencode/${channel}`)
         .then((res) => {
           if (!res.ok) throw new Error(res.statusText)
           return res.json()
