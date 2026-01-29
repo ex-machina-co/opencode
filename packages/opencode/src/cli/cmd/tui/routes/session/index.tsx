@@ -1407,9 +1407,8 @@ function ToolPart(props: { last: boolean; part: ToolPart; message: AssistantMess
     },
   }
 
-  const isTask = createMemo(
-    () => props.part.tool === "task" || toolprops.metadata.sessionId || toolprops.metadata.summary,
-  )
+  const isTask = createMemo(() => props.part.tool === "task" || toolprops.subagentType !== 'unknown')
+
   return (
     <Show when={!shouldHide()}>
       <Switch>
