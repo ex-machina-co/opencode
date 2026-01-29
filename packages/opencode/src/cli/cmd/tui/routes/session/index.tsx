@@ -1401,12 +1401,13 @@ function ToolPart(props: { last: boolean; part: ToolPart; message: AssistantMess
     },
   }
 
-  const isTask = props.part.tool === "task" || toolprops.metadata.sessionId || toolprops.metadata.summary
-
+  const isTask = createMemo(
+    () => props.part.tool === "task" || toolprops.metadata.sessionId || toolprops.metadata.summary,
+  )
   return (
     <Show when={!shouldHide()}>
       <Switch>
-        <Match when={isTask}>
+        <Match when={isTask()}>
           <Task {...toolprops} />
         </Match>
         <Match when={props.part.tool === "bash"}>
