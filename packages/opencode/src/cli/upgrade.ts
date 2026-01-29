@@ -2,6 +2,7 @@ import { Bus } from "@/bus"
 import { Config } from "@/config/config"
 import { Flag } from "@/flag/flag"
 import { Installation } from "@/installation"
+import { TuiEvent } from "./cmd/tui/event"
 
 export async function upgrade() {
   const config = await Config.global()
@@ -21,5 +22,12 @@ export async function upgrade() {
   if (method === "unknown") return
   await Installation.upgrade(method, latest)
     .then(() => Bus.publish(Installation.Event.Updated, { version: latest }))
-    .catch(() => {})
+    .catch((err) => {
+      const message = err instanceof Error ? err.message : String(err)
+      Bus.publish(TuiEvent.ToastShow, {
+        title: "Auto-update failed",
+        message,
+        variant: "error",
+      })
+    })
 }
