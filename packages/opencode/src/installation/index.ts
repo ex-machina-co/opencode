@@ -204,7 +204,8 @@ export namespace Installation {
         const reg = r || "https://registry.npmjs.org"
         return reg.endsWith("/") ? reg.slice(0, -1) : reg
       })
-      return fetch(`${registry}/@ex-machina/opencode/latest`)
+      const channel = CHANNEL
+      return fetch(`${registry}/@ex-machina/opencode/${channel}`)
         .then((res) => {
           if (!res.ok) throw new Error(res.statusText)
           return res.json()
