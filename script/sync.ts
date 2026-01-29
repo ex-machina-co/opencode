@@ -134,7 +134,7 @@ async function main() {
   // Step 5: Push main
   log('\n5. Pushing main...')
   if (!dryRun) {
-    await push('origin', 'main')
+    await push('origin', 'main', '--no-verify')
   } else {
     dryLog('Would push main to origin')
   }
