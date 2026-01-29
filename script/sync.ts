@@ -81,7 +81,8 @@ async function main() {
   if (!dryRun) {
     await checkout('dev')
     await resetHardTo('base/dev')
-    await push('origin', 'dev', '--no-verify')
+    await push('origin', 'dev', '--tags --no-verify')
+    await push('personal', 'dev', '--tags --no-verify')
   } else {
     dryLog('Would checkout dev')
     dryLog('Would reset dev to base/dev')
