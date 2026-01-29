@@ -10,6 +10,7 @@
     "typecheck": "bun turbo typecheck",
     "prepare": "husky",
     "sync": "bun script/sync.ts",
+    "bump": "bun script/bump.ts",
     "random": "echo 'Random script'",
     "hello": "echo 'Hello World!'",
     "test": "echo 'do not run tests from root' && exit 1"
