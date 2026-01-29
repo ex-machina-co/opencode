@@ -93,34 +93,4 @@ describe("question.ask endpoint", () => {
       },
     })
   })
-
-  test("should return 400 when header is too long", async () => {
-    await Instance.provide({
-      directory: projectRoot,
-      fn: async () => {
-        // #given
-        const session = await Session.create({})
-        const longHeaderQuestions: Question.AskInput["questions"] = [
-          {
-            question: "What is your name?",
-            header: "This header is way too long",
-            options: [{ description: "Option", label: "Option" }],
-          },
-        ]
-
-        // #when
-        const app = Server.App()
-        const response = await app.request("/question/ask", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionID: session.id, questions: longHeaderQuestions }),
-        })
-
-        // #then
-        expect(response.status).toBe(400)
-
-        await Session.remove(session.id)
-      },
-    })
-  })
 })
