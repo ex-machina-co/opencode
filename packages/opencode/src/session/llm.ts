@@ -1,4 +1,3 @@
-import os from "os"
 import { Installation } from "@/installation"
 import { Provider } from "@/provider/provider"
 import { Log } from "@/util/log"
@@ -9,7 +8,6 @@ import {
   type StreamTextResult,
   type Tool,
   type ToolSet,
-  extractReasoningMiddleware,
   tool,
   jsonSchema,
 } from "ai"
@@ -158,19 +156,6 @@ export namespace LLM {
           input.model.limit.output,
           OUTPUT_TOKEN_MAX,
         )
-    log.info("max_output_tokens", {
-      tokens: ProviderTransform.maxOutputTokens(
-        input.model.api.npm,
-        params.options,
-        input.model.limit.output,
-        OUTPUT_TOKEN_MAX,
-      ),
-      modelOptions: params.options,
-      outputLimit: input.model.limit.output,
-    })
-    // tokens = 32000
-    // outputLimit = 64000
-    // modelOptions={"reasoningEffort":"minimal"}
 
     const tools = await resolveTools(input)
 
@@ -274,10 +259,15 @@ export namespace LLM {
               return args.params
             },
           },
-          extractReasoningMiddleware({ tagName: "think", startWithReasoning: false }),
         ],
       }),
-      experimental_telemetry: { isEnabled: cfg.experimental?.openTelemetry },
+      experimental_telemetry: {
+        isEnabled: cfg.experimental?.openTelemetry,
+        metadata: {
+          userId: cfg.username ?? "unknown",
+          sessionId: input.sessionID,
+        },
+      },
     })
   }
 
