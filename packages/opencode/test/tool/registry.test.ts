@@ -4,6 +4,8 @@ import fs from "fs/promises"
 import { tmpdir } from "../fixture/fixture"
 import { Instance } from "../../src/project/instance"
 import { ToolRegistry } from "../../src/tool/registry"
+import { Tool } from "../../src/tool/tool"
+import { Provider } from "../../src/provider/provider"
 
 describe("tool.registry", () => {
   test("loads tools from .opencode/tool (singular)", async () => {
@@ -28,14 +30,61 @@ describe("tool.registry", () => {
             "",
           ].join("\n"),
         )
+
+        await Bun.write(
+          path.join(toolDir, "goodbye.ts"),
+          [
+            "export default {",
+            "  description: 'goodbye tool',",
+            "  args: {},",
+            "  execute: async () => {",
+            "    return {",
+            "      title: 'goodbye title',",
+            "      output: 'goodbye world',",
+            "      metadata: { nihilism: true },",
+            "    }",
+            "  },",
+            "}",
+            "",
+          ].join("\n"),
+        )
       },
     })
 
     await Instance.provide({
       directory: tmp.path,
       fn: async () => {
-        const ids = await ToolRegistry.ids()
-        expect(ids).toContain("hello")
+        const tools = await ToolRegistry.tools(await Provider.defaultModel())
+        const hello = tools.find((t) => t.id === "hello")
+        const goodbye = tools.find((t) => t.id === "goodbye")
+
+        expect(hello).toBeDefined()
+        expect(goodbye).toBeDefined()
+
+        const helloResult = await hello?.execute({}, {} as Tool.Context)
+        const goodbyeResult = await goodbye?.execute({}, {} as Tool.Context)
+
+        expect(helloResult).toMatchInlineSnapshot(`
+          {
+            "metadata": {
+              "outputPath": undefined,
+              "truncated": false,
+            },
+            "output": "hello world",
+            "title": "",
+          }
+        `)
+        expect(goodbyeResult).toMatchInlineSnapshot(`
+          {
+            "metadata": {
+              "nihilism": true,
+              "outputPath": undefined,
+              "truncated": false,
+            },
+            "output": "goodbye world",
+            "title": "goodbye title",
+          }
+        `)
       },
     })
   })
