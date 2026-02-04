@@ -1,17 +1,17 @@
-import type { createOpencodeClient as createOpencodeClientV1 } from "@opencode-ai/sdk"
 import type {
   Event,
   createOpencodeClient,
   Project,
   Model,
   Provider,
+  Permission,
   UserMessage,
-  Auth,
-  Config,
-  Agent,
   Message,
   Part,
-} from "@opencode-ai/sdk/v2"
+  Auth,
+  Config,
+} from "@opencode-ai/sdk"
+import type { createOpencodeClient as createOpencodeClientV2 } from "@opencode-ai/sdk/v2"
 
 import type { BunShell } from "./shell"
 import { type ToolDefinition } from "./tool"
@@ -25,8 +25,8 @@ export type ProviderContext = {
 }
 
 export type PluginInput = {
-  client: ReturnType<typeof createOpencodeClientV1>
-  clientNext: ReturnType<typeof createOpencodeClient>
+  client: ReturnType<typeof createOpencodeClient>
+  clientNext: ReturnType<typeof createOpencodeClientV2>
   project: Project
   directory: string
   worktree: string
@@ -171,43 +171,30 @@ export interface Hooks {
    * Modify parameters sent to LLM
    */
   "chat.params"?: (
-    input: { sessionID: string; agent: Agent; model: Model; provider: Provider; message: UserMessage },
-    output: { temperature?: number; topP?: number; topK?: number; options: Record<string, any> },
+    input: { sessionID: string; agent: string; model: Model; provider: ProviderContext; message: UserMessage },
+    output: { temperature: number; topP: number; topK: number; options: Record<string, any> },
   ) => Promise<void>
   "chat.headers"?: (
-    input: { sessionID: string; agent: Omit<Agent, 'builtIn' | 'tools'>; model: Model; provider: Provider; message: UserMessage },
+    input: { sessionID: string; agent: string; model: Model; provider: ProviderContext; message: UserMessage },
     output: { headers: Record<string, string> },
   ) => Promise<void>
-  "permission.ask"?: (
-    input: {
-      id: string
-      type: string
-      pattern?: string | Array<string>
-      sessionID: string
-      messageID: string
-      callID?: string
-      message: string
-      metadata: { [key: string]: unknown }
-      time: { created: number }
-    },
-    output: { status: "ask" | "deny" | "allow" },
-  ) => Promise<void>
+  "permission.ask"?: (input: Permission, output: { status: "ask" | "deny" | "allow" }) => Promise<void>
   "command.execute.before"?: (
     input: { command: string; sessionID: string; arguments: string },
-    output: { parts: Omit<Part | { id?: string }, 'sessionID' | 'messageID'>[] },
+    output: { parts: Part[] },
   ) => Promise<void>
   "tool.execute.before"?: (
-    input: { tool: string; sessionID: string; callID?: string },
+    input: { tool: string; sessionID: string; callID: string },
     output: { args: any },
   ) => Promise<void>
   "shell.env"?: (input: { cwd: string }, output: { env: Record<string, string> }) => Promise<void>
   "tool.execute.after"?: (
-    input: { tool: string; sessionID: string; callID?: string },
+    input: { tool: string; sessionID: string; callID: string },
     output: {
       title: string
       output: string
       metadata: any
-    } | undefined,
+    },
   ) => Promise<void>
   "experimental.chat.messages.transform"?: (
     input: {},
