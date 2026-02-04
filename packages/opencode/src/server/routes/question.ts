@@ -6,7 +6,6 @@ import { Session } from "../../session"
 import z from "zod"
 import { errors } from "../error"
 import { lazy } from "../../util/lazy"
-import { Session } from "../../session"
 
 export const QuestionRoutes = lazy(() =>
   new Hono()
