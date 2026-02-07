@@ -1406,12 +1406,6 @@ function ToolPart(props: { last: boolean; part: ToolPart; message: AssistantMess
     get input() {
       return props.part.state.input ?? {}
     },
-    get subagentType(): string {
-      return `${this.input.subagent_type ?? this.metadata.subagent_type ?? "unknown"}`
-    },
-    get description(): string {
-      return `${this.input.description ?? this.metadata.description ?? ""}`
-    },
     get output() {
       return props.part.state.status === "completed" ? props.part.state.output : undefined
     },
@@ -1428,14 +1422,9 @@ function ToolPart(props: { last: boolean; part: ToolPart; message: AssistantMess
     },
   }
 
-  const isTask = createMemo(() => props.part.tool === "task" || toolprops.subagentType !== 'unknown')
-
   return (
     <Show when={!shouldHide()}>
       <Switch>
-        <Match when={isTask()}>
-          <Task {...toolprops} />
-        </Match>
         <Match when={props.part.tool === "bash"}>
           <Bash {...toolprops} />
         </Match>
@@ -1466,6 +1455,9 @@ function ToolPart(props: { last: boolean; part: ToolPart; message: AssistantMess
         <Match when={props.part.tool === "edit"}>
           <Edit {...toolprops} />
         </Match>
+        <Match when={props.part.tool === "task" || props.part.state.input.subagent_type}>
+          <Task {...toolprops} />
+        </Match>
         <Match when={props.part.tool === "apply_patch"}>
           <ApplyPatch {...toolprops} />
         </Match>
@@ -1491,8 +1483,6 @@ type ToolProps<T extends Tool.Info> = {
   metadata: Partial<Tool.InferMetadata<T>>
   permission: Record<string, any>
   tool: string
-  subagentType: string
-  description: string
   output?: string
   part: ToolPart
 }
@@ -1856,14 +1846,14 @@ function Task(props: ToolProps<typeof TaskTool>) {
   })
 
   const current = createMemo(() => tools().findLast((x) => x.state.status !== "pending"))
-  const color = createMemo(() => local.agent.color(props.subagentType))
+
   const isRunning = createMemo(() => props.part.state.status === "running")
 
   return (
     <Switch>
-      <Match when={props.metadata.summary?.length || props.metadata.sessionId}>
+      <Match when={props.input.description || props.input.subagent_type}>
         <BlockTool
-          title={"# " + Locale.titlecase(props.subagentType) + " Task"}
+          title={"# " + Locale.titlecase(props.input.subagent_type ?? "unknown") + " Task"}
           onClick={
             props.metadata.sessionId
               ? () => navigate({ type: "session", sessionID: props.metadata.sessionId! })
@@ -1896,15 +1886,8 @@ function Task(props: ToolProps<typeof TaskTool>) {
         </BlockTool>
       </Match>
       <Match when={true}>
-        <InlineTool
-          icon="◉"
-          iconColor={color()}
-          pending="Delegating..."
-          complete={props.subagentType !== "unknown" ? props.subagentType : props.description}
-          part={props.part}
-        >
-          <span style={{ fg: theme.text }}>{Locale.titlecase(props.subagentType)}</span> Task "
-          {props.description}"
+        <InlineTool icon="#" pending="Delegating..." complete={props.input.subagent_type} part={props.part}>
+          {props.input.subagent_type} Task {props.input.description}
         </InlineTool>
       </Match>
     </Switch>
