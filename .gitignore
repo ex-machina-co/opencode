@@ -28,4 +28,4 @@ opencode-dev
 logs/
 *.bun-build
 dist-cli/
-dist-cli/
+tsconfig.tsbuildinfo
