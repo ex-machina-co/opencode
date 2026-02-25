@@ -132,7 +132,7 @@ const { binaries, PATCHED_VERSION: version } = await import("./build-patched-cli
 
 const distDir = path.join(ROOT, "packages/opencode/dist")
 
-// Publish platform binary packages in parallel
+// Publish platform binary packages in parallel (use allSettled so one failure doesn't abort the rest)
 const tasks = Object.entries(binaries).map(async ([name, ver]) => {
   if (await exists(name, ver as string)) {
     console.log(`  Skip ${name}@${ver} (already published)`)
@@ -147,7 +147,15 @@ const tasks = Object.entries(binaries).map(async ([name, ver]) => {
   await $`npm publish *.tgz --access public --tag latest`.cwd(pkgDir)
   console.log(`  ${name}@${ver} published`)
 })
-await Promise.all(tasks)
+const results = await Promise.allSettled(tasks)
+const failures = results.filter((r): r is PromiseRejectedResult => r.status === "rejected")
+if (failures.length) {
+  for (const f of failures) console.error("  Failed:", f.reason)
+  console.error(
+    `\n${failures.length} platform package(s) failed to publish. Re-run to retry (already-published packages will be skipped).`,
+  )
+  process.exit(1)
+}
 
 // Publish main @ex-machina/opencode wrapper
 const mainPkg = "@ex-machina/opencode"

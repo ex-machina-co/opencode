@@ -5,10 +5,10 @@ on:
     branches:
       - main
     paths:
-      - 'PATCHED_VERSION'
+      - "PATCHED_VERSION"
 
 permissions:
-  id-token: write  # Required for OIDC trusted publishing
+  id-token: write # Required for OIDC trusted publishing
   contents: read
 
 jobs:
@@ -26,11 +26,13 @@ jobs:
       - name: Setup Node (for npm publish)
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
         run: bun install
 
       - name: Publish patched packages
         run: bun script/publish-patched.ts
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
