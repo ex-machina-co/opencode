@@ -1,7 +1,0 @@
-{
-  "name": "@ex-machina/opencode-darwin-arm64",
-  "version": "0.0.1",
-  "description": "Patched opencode CLI (darwin-arm64)",
-  "os": ["darwin"],
-  "cpu": ["arm64"]
-}
