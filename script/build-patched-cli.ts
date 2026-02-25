@@ -31,6 +31,9 @@ console.log(`\nBuilding patched CLI version: ${PATCHED_VERSION}\n`)
 process.env.OPENCODE_VERSION = PATCHED_VERSION
 process.env.OPENCODE_CHANNEL = "latest"
 
+// Force all-platform build even in CI (upstream defaults to --single in CI)
+process.argv.push("--all")
+
 // Run the upstream build (handles migrations, models-snapshot, all platforms, defines)
 await import("../packages/opencode/script/build.ts")
 
