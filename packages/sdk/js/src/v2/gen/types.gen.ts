@@ -3839,6 +3839,7 @@ export type QuestionAskData = {
   path?: never
   query?: {
     directory?: string
+    workspace?: string
   }
   url: "/question/ask"
 }

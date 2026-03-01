@@ -2389,6 +2389,7 @@ export class Question extends HeyApiClient {
   public ask<ThrowOnError extends boolean = false>(
     parameters?: {
       directory?: string
+      workspace?: string
       questionAskInput?: QuestionAskInput
     },
     options?: Options<never, ThrowOnError>,
@@ -2399,6 +2400,7 @@ export class Question extends HeyApiClient {
         {
           args: [
             { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
             { key: "questionAskInput", map: "body" },
           ],
         },
