@@ -23,6 +23,9 @@ function shellResult(stdout: string) {
 
 describe("verify-publish", () => {
   beforeEach(() => {
+    // Stub sleep to be instant in tests
+    spyOn(io, "sleep").mockResolvedValue(undefined as any)
+
     // Default: all packages exist
     spyOn(io, "viewVersion").mockImplementation(((_pkg: string, ver: string) =>
       Promise.resolve(shellResult(ver))) as any)
@@ -38,7 +41,7 @@ describe("verify-publish", () => {
     expect(code).toBe(0)
   })
 
-  test("returns 1 when some packages are missing", async () => {
+  test("returns 1 when some packages are missing after all retries", async () => {
     spyOn(io, "viewVersion").mockImplementation(((pkg: string, ver: string) => {
       if (pkg === "@ex-machina/opencode-darwin-arm64") return Promise.reject(new Error("404"))
       if (pkg === "@ex-machina/opencode-linux-arm64") return Promise.reject(new Error("404"))
@@ -48,6 +51,23 @@ describe("verify-publish", () => {
     const { main } = await import("./verify-publish")
     const code = await main()
     expect(code).toBe(1)
+  })
+
+  test("returns 0 when missing packages appear on retry", async () => {
+    let calls = 0
+    spyOn(io, "viewVersion").mockImplementation(((pkg: string, ver: string) => {
+      if (pkg === "@ex-machina/opencode-darwin-arm64") {
+        calls++
+        // Fail first 2 calls (initial check + retry 1), succeed on retry 2
+        if (calls <= 2) return Promise.reject(new Error("404"))
+      }
+      return Promise.resolve(shellResult(ver))
+    }) as any)
+
+    const { main } = await import("./verify-publish")
+    const code = await main()
+    expect(code).toBe(0)
+    expect(calls).toBeGreaterThanOrEqual(3)
   })
 
   test("returns 1 when all packages are missing (npm down)", async () => {

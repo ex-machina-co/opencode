@@ -36,4 +36,7 @@ export const io = {
   // fs
   readFile: (path: string) => Bun.file(path).text(),
   writeFile: (path: string, content: string) => Bun.write(path, content),
+
+  // util
+  sleep: (ms: number) => Bun.sleep(ms),
 }
