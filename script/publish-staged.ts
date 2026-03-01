@@ -20,7 +20,7 @@ const DIST_DIR = path.join(ROOT, "packages/opencode/dist")
 
 async function publishSdk() {
   if (await versionExists("@ex-machina/opencode-sdk", PATCHED_VERSION)) {
-    console.log(`  Skip @ex-machina/opencode-sdk@${PATCHED_VERSION} (already published)`)
+    io.log(`  Skip @ex-machina/opencode-sdk@${PATCHED_VERSION} (already published)`)
     return
   }
 
@@ -39,7 +39,7 @@ async function publishSdk() {
   try {
     await io.pack(dir)
     await io.publish(dir, "staging")
-    console.log(`  @ex-machina/opencode-sdk@${PATCHED_VERSION} published (staging)`)
+    io.log(`  @ex-machina/opencode-sdk@${PATCHED_VERSION} published (staging)`)
   } finally {
     await io.writeFile(file, original)
     await io.rm(path.join(dir, "*.tgz"))
@@ -48,7 +48,7 @@ async function publishSdk() {
 
 async function publishPlugin() {
   if (await versionExists("@ex-machina/opencode-plugin", PATCHED_VERSION)) {
-    console.log(`  Skip @ex-machina/opencode-plugin@${PATCHED_VERSION} (already published)`)
+    io.log(`  Skip @ex-machina/opencode-plugin@${PATCHED_VERSION} (already published)`)
     return
   }
 
@@ -71,7 +71,7 @@ async function publishPlugin() {
   try {
     await io.pack(dir)
     await io.publish(dir, "staging")
-    console.log(`  @ex-machina/opencode-plugin@${PATCHED_VERSION} published (staging)`)
+    io.log(`  @ex-machina/opencode-plugin@${PATCHED_VERSION} published (staging)`)
   } finally {
     await io.writeFile(file, original)
     await io.rm(path.join(dir, "*.tgz"))
@@ -85,7 +85,7 @@ async function publishBinaries(packages: string[]) {
 
   const tasks = binaries.map(async (name) => {
     if (await versionExists(name, PATCHED_VERSION)) {
-      console.log(`  Skip ${name}@${PATCHED_VERSION} (already published)`)
+      io.log(`  Skip ${name}@${PATCHED_VERSION} (already published)`)
       return
     }
     const dirName = name.replace("@ex-machina/", "")
@@ -93,30 +93,30 @@ async function publishBinaries(packages: string[]) {
     await io.chmod(pkgDir)
     await io.pack(pkgDir)
     await io.publish(pkgDir, "staging")
-    console.log(`  ${name}@${PATCHED_VERSION} published (staging)`)
+    io.log(`  ${name}@${PATCHED_VERSION} published (staging)`)
   })
 
   const results = await Promise.allSettled(tasks)
   const failures = results.filter((r): r is PromiseRejectedResult => r.status === "rejected")
   if (failures.length) {
-    for (const f of failures) console.error("  Failed:", f.reason)
+    for (const f of failures) io.error("  Failed:", f.reason)
     throw new Error(`${failures.length} platform package(s) failed to publish`)
   }
 }
 
 async function publishWrapper() {
   if (await versionExists("@ex-machina/opencode", PATCHED_VERSION)) {
-    console.log(`  Skip @ex-machina/opencode@${PATCHED_VERSION} (already published)`)
+    io.log(`  Skip @ex-machina/opencode@${PATCHED_VERSION} (already published)`)
     return
   }
   const mainDir = path.join(DIST_DIR, "@ex-machina-opencode")
   await io.pack(mainDir)
   await io.publish(mainDir, "staging")
-  console.log(`  @ex-machina/opencode@${PATCHED_VERSION} published (staging)`)
+  io.log(`  @ex-machina/opencode@${PATCHED_VERSION} published (staging)`)
 }
 
 export async function main() {
-  console.log(`\n=== Publishing to staging: ${PATCHED_VERSION} ===\n`)
+  io.log(`\n=== Publishing to staging: ${PATCHED_VERSION} ===\n`)
 
   await publishSdk()
   await publishPlugin()
@@ -125,13 +125,13 @@ export async function main() {
   await publishBinaries(packages)
   await publishWrapper()
 
-  console.log(`\n=== All packages published to staging ===`)
+  io.log(`\n=== All packages published to staging ===`)
   return 0
 }
 
 if (import.meta.main) {
   const code = await main().catch((err) => {
-    console.error(err.message)
+    io.error(err.message)
     return 1
   })
   process.exit(code)

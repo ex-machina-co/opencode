@@ -1,24 +1,6 @@
 import { afterEach, beforeEach, describe, expect, mock, spyOn, test } from "bun:test"
 import { io } from "./lib/io"
-
-const FAKE_VERSION = "1.2.15-exmachina.1"
-const FAKE_PACKAGES = [
-  "@ex-machina/opencode-sdk",
-  "@ex-machina/opencode-plugin",
-  "@ex-machina/opencode-linux-arm64",
-  "@ex-machina/opencode-linux-x64",
-  "@ex-machina/opencode-darwin-arm64",
-  "@ex-machina/opencode",
-]
-
-mock.module("./lib/packages", () => ({
-  PATCHED_VERSION: FAKE_VERSION,
-  allPackages: async () => FAKE_PACKAGES,
-}))
-
-function shellResult(stdout = "") {
-  return { stdout: Buffer.from(stdout), exitCode: 0 } as any
-}
+import { FAKE_VERSION, shellResult, setup } from "./lib/test-helper"
 
 // Fake package.json content for SDK and Plugin
 const FAKE_SDK_PKG = JSON.stringify({
@@ -43,6 +25,8 @@ describe("publish-staged", () => {
   let writeFileSpy: ReturnType<typeof spyOn>
 
   beforeEach(() => {
+    setup()
+
     // Default: no versions exist (everything needs publishing)
     viewVersionSpy = spyOn(io, "viewVersion").mockImplementation((() => Promise.reject(new Error("404"))) as any)
 

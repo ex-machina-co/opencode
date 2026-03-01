@@ -37,6 +37,10 @@ export const io = {
   readFile: (path: string) => Bun.file(path).text(),
   writeFile: (path: string, content: string) => Bun.write(path, content),
 
+  // console
+  log: (...args: unknown[]) => console.log(...args),
+  error: (...args: unknown[]) => console.error(...args),
+
   // util
   sleep: (ms: number) => Bun.sleep(ms),
 }

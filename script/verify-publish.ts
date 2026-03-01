@@ -21,18 +21,18 @@ const RETRY_DELAY_MS = 15_000
 const MAX_RETRIES = 4
 
 export async function main() {
-  console.log(`\n=== Verifying packages at version ${PATCHED_VERSION} ===\n`)
+  io.log(`\n=== Verifying packages at version ${PATCHED_VERSION} ===\n`)
 
   const packages = await allPackages()
 
-  console.log(`Waiting ${INITIAL_DELAY_MS / 1000}s for registry propagation...`)
+  io.log(`Waiting ${INITIAL_DELAY_MS / 1000}s for registry propagation...`)
   await io.sleep(INITIAL_DELAY_MS)
 
   let missing = packages.slice()
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     if (attempt > 0) {
-      console.log(
+      io.log(
         `\nRetry ${attempt}/${MAX_RETRIES} — rechecking ${missing.length} package(s) in ${RETRY_DELAY_MS / 1000}s...`,
       )
       await io.sleep(RETRY_DELAY_MS)
@@ -48,19 +48,19 @@ export async function main() {
     const still = results.filter((r) => !r.ok).map((r) => r.pkg)
     const found = results.filter((r) => r.ok).map((r) => r.pkg)
 
-    for (const pkg of found) console.log(`  ok ${pkg}@${PATCHED_VERSION}`)
-    for (const pkg of still) console.log(`  MISSING ${pkg}@${PATCHED_VERSION}`)
+    for (const pkg of found) io.log(`  ok ${pkg}@${PATCHED_VERSION}`)
+    for (const pkg of still) io.log(`  MISSING ${pkg}@${PATCHED_VERSION}`)
 
     missing = still
     if (missing.length === 0) break
   }
 
   if (missing.length) {
-    console.error(`\n${missing.length} of ${packages.length} packages still missing after ${MAX_RETRIES} retries.`)
+    io.error(`\n${missing.length} of ${packages.length} packages still missing after ${MAX_RETRIES} retries.`)
     return 1
   }
 
-  console.log(`\n=== All ${packages.length} packages verified ===`)
+  io.log(`\n=== All ${packages.length} packages verified ===`)
   return 0
 }
 

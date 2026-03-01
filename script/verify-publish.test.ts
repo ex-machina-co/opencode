@@ -1,30 +1,10 @@
 import { afterEach, beforeEach, describe, expect, mock, spyOn, test } from "bun:test"
 import { io } from "./lib/io"
-
-const FAKE_VERSION = "1.2.15-exmachina.1"
-const FAKE_PACKAGES = [
-  "@ex-machina/opencode-sdk",
-  "@ex-machina/opencode-plugin",
-  "@ex-machina/opencode-linux-arm64",
-  "@ex-machina/opencode-linux-x64",
-  "@ex-machina/opencode-darwin-arm64",
-  "@ex-machina/opencode",
-]
-
-// Mock packages module to avoid needing a real dist/
-mock.module("./lib/packages", () => ({
-  PATCHED_VERSION: FAKE_VERSION,
-  allPackages: async () => FAKE_PACKAGES,
-}))
-
-function shellResult(stdout: string) {
-  return { stdout: Buffer.from(stdout), exitCode: 0 } as any
-}
+import { FAKE_VERSION, shellResult, setup } from "./lib/test-helper"
 
 describe("verify-publish", () => {
   beforeEach(() => {
-    // Stub sleep to be instant in tests
-    spyOn(io, "sleep").mockResolvedValue(undefined as any)
+    setup()
 
     // Default: all packages exist
     spyOn(io, "viewVersion").mockImplementation(((_pkg: string, ver: string) =>
