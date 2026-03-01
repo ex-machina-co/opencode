@@ -13,7 +13,7 @@ export const io = {
   viewName: (pkg: string) => $`npm view ${pkg} name`.quiet(),
   viewVersion: (pkg: string, ver: string) => $`npm view ${pkg}@${ver} version`.quiet(),
   publish: (cwd: string, tag: string) => $`npm publish *.tgz --provenance --access public --tag ${tag}`.cwd(cwd),
-  publishPlain: (cwd: string) => $`npm publish --access public`.cwd(cwd),
+  publishPlain: (cwd: string) => $`npm publish --access public --auth-type=web`.cwd(cwd),
   distTagAdd: (pkg: string, ver: string, tag: string) => $`npm dist-tag add ${pkg}@${ver} ${tag}`,
 
   // shell
