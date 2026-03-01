@@ -69,8 +69,8 @@ function printOidcInstructions(packages: string[]) {
   for (const pkg of packages) {
     log(`\n   ${pkg}`)
     log(`     → https://www.npmjs.com/package/${pkg}/access`)
-    log(`       Organization or user: ${OIDC_ORG}`)
-    log(`       Repository:           ${OIDC_REPO}`)
+    log(`       Organization or user:  ${OIDC_ORG}`)
+    log(`       Repository:            ${OIDC_REPO}`)
     log(`       Workflow filename:     ${OIDC_WORKFLOW}`)
     log(`       Environment:           (leave blank)`)
   }
