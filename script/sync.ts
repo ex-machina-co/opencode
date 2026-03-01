@@ -60,7 +60,8 @@ function prompt(question: string): Promise<string> {
   })
 }
 
-const OIDC_REPO = "ex-machina-co/opencode"
+const OIDC_ORG = "ex-machina-co"
+const OIDC_REPO = "opencode"
 const OIDC_WORKFLOW = "publish-patched.yml"
 
 function printOidcInstructions(packages: string[]) {
@@ -68,9 +69,10 @@ function printOidcInstructions(packages: string[]) {
   for (const pkg of packages) {
     log(`\n   ${pkg}`)
     log(`     → https://www.npmjs.com/package/${pkg}/access`)
-    log(`       Repository:  ${OIDC_REPO}`)
-    log(`       Workflow:    ${OIDC_WORKFLOW}`)
-    log(`       Environment: (leave blank)`)
+    log(`       Organization or user: ${OIDC_ORG}`)
+    log(`       Repository:           ${OIDC_REPO}`)
+    log(`       Workflow filename:     ${OIDC_WORKFLOW}`)
+    log(`       Environment:           (leave blank)`)
   }
 }
 
