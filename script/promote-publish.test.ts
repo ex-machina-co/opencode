@@ -101,4 +101,31 @@ describe("promote-publish", () => {
     expect(code).toBe(0)
     expect(distTagSpy).toHaveBeenCalledTimes(FAKE_PACKAGES.length)
   })
+
+  test("promotes only packages behind while skipping up-to-date ones", async () => {
+    viewDistTagSpy = spyOn(io, "viewDistTag").mockImplementation(((pkg: string) => {
+      // Most packages already at current version, one is behind
+      if (pkg === "@ex-machina/opencode-linux-arm64") return Promise.resolve(shellResult("1.2.14-exmachina.1"))
+      return Promise.resolve(shellResult(FAKE_VERSION))
+    }) as any)
+
+    const { main } = await import("./promote-publish")
+    const code = await main()
+    expect(code).toBe(0)
+    expect(distTagSpy).toHaveBeenCalledTimes(1)
+    expect(distTagSpy).toHaveBeenCalledWith("@ex-machina/opencode-linux-arm64", FAKE_VERSION, "latest")
+  })
+
+  test("promotes package with placeholder version", async () => {
+    viewDistTagSpy = spyOn(io, "viewDistTag").mockImplementation(((pkg: string) => {
+      if (pkg === "@ex-machina/opencode-linux-arm64") return Promise.resolve(shellResult("0.0.0-exmachina.0"))
+      return Promise.resolve(shellResult(FAKE_VERSION))
+    }) as any)
+
+    const { main } = await import("./promote-publish")
+    const code = await main()
+    expect(code).toBe(0)
+    expect(distTagSpy).toHaveBeenCalledTimes(1)
+    expect(distTagSpy).toHaveBeenCalledWith("@ex-machina/opencode-linux-arm64", FAKE_VERSION, "latest")
+  })
 })

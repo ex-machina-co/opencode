@@ -19,23 +19,26 @@ import { io } from "./lib/io"
 export async function main() {
   io.log(`\n=== Promoting ${PATCHED_VERSION} to latest ===\n`)
 
-  const current = await latestVersion("@ex-machina/opencode")
-  if (current) {
-    try {
-      if (!isNewer(PATCHED_VERSION, current)) {
-        io.log(`Skipping: ${PATCHED_VERSION} is not newer than current latest ${current}`)
-        return 0
-      }
-    } catch {
-      // current latest isn't in exmachina format — proceed with promotion
-    }
-  }
-
   const packages = await allPackages()
+  let promoted = 0
+  let skipped = 0
   const results = await Promise.allSettled(
     packages.map(async (pkg) => {
+      const current = await latestVersion(pkg)
+      if (current) {
+        try {
+          if (!isNewer(PATCHED_VERSION, current)) {
+            io.log(`  ${pkg} skipped (${current} >= ${PATCHED_VERSION})`)
+            skipped++
+            return
+          }
+        } catch {
+          // current latest isn't in exmachina format — promote anyway
+        }
+      }
       await distTagAdd(pkg, PATCHED_VERSION, "latest")
       io.log(`  ${pkg}@${PATCHED_VERSION} -> latest`)
+      promoted++
     }),
   )
 
@@ -46,7 +49,12 @@ export async function main() {
     return 1
   }
 
-  io.log(`\n=== All ${packages.length} packages promoted to latest ===`)
+  if (skipped === packages.length) {
+    io.log(`\n=== All ${packages.length} packages already at latest >= ${PATCHED_VERSION} ===`)
+    return 0
+  }
+
+  io.log(`\n=== ${promoted} packages promoted to latest (${skipped} already up-to-date) ===`)
   io.log(`\nTo use the patched CLI:`)
   io.log(`  npm install -g @ex-machina/opencode`)
   io.log(`\nTo use in opencode-orca, update package.json:`)
