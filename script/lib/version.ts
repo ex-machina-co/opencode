@@ -10,7 +10,7 @@ export interface PatchedVersion {
   patch: number // e.g., 4
 }
 
-const SUFFIX = '-exmachina.'
+const SUFFIX = "-exmachina."
 
 export function parsePatchedVersion(version: string): PatchedVersion {
   const idx = version.indexOf(SUFFIX)
@@ -35,4 +35,17 @@ export function resetToNewBase(base: string): PatchedVersion {
 
 export function bumpPatch(v: PatchedVersion): PatchedVersion {
   return { base: v.base, patch: v.patch + 1 }
+}
+
+/** Returns true if version `a` is strictly newer than version `b`. */
+export function isNewer(a: string, b: string): boolean {
+  const va = parsePatchedVersion(a)
+  const vb = parsePatchedVersion(b)
+  const pa = va.base.split(".").map(Number) as [number, number, number]
+  const pb = vb.base.split(".").map(Number) as [number, number, number]
+  for (let i = 0; i < 3; i++) {
+    if (pa[i]! > pb[i]!) return true
+    if (pa[i]! < pb[i]!) return false
+  }
+  return va.patch > vb.patch
 }

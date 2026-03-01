@@ -66,6 +66,16 @@ export async function publishPlaceholder(pkg: string) {
   }
 }
 
+/** Get the version that a dist-tag currently points to, or null if it doesn't exist. */
+export async function latestVersion(pkg: string) {
+  try {
+    const result = await io.viewDistTag(pkg, "latest")
+    return result.stdout.toString().trim() || null
+  } catch {
+    return null
+  }
+}
+
 /** Add a dist-tag to a package version. */
 export async function distTagAdd(pkg: string, version: string, tag: string) {
   await io.distTagAdd(pkg, version, tag)

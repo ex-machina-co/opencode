@@ -12,11 +12,24 @@
  */
 
 import { allPackages, PATCHED_VERSION } from "./lib/packages"
-import { distTagAdd } from "./lib/npm"
+import { distTagAdd, latestVersion } from "./lib/npm"
+import { isNewer } from "./lib/version"
 import { io } from "./lib/io"
 
 export async function main() {
   io.log(`\n=== Promoting ${PATCHED_VERSION} to latest ===\n`)
+
+  const current = await latestVersion("@ex-machina/opencode")
+  if (current) {
+    try {
+      if (!isNewer(PATCHED_VERSION, current)) {
+        io.log(`Skipping: ${PATCHED_VERSION} is not newer than current latest ${current}`)
+        return 0
+      }
+    } catch {
+      // current latest isn't in exmachina format — proceed with promotion
+    }
+  }
 
   const packages = await allPackages()
   const results = await Promise.allSettled(

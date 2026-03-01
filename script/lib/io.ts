@@ -24,6 +24,7 @@ export const io = {
       if (code !== 0) throw new Error(`Failed with exit code ${code}`)
     })
   },
+  viewDistTag: (pkg: string, tag: string) => $`npm view ${pkg}@${tag} version`.quiet(),
   distTagAdd: (pkg: string, ver: string, tag: string) => $`npm dist-tag add ${pkg}@${ver} ${tag}`,
 
   // shell
