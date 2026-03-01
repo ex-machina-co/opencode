@@ -31,7 +31,7 @@ import {
   resetHardTo,
   writeFile,
 } from "./lib/git"
-import { packageExists, publishPlaceholder, versionExists, whoami } from "./lib/npm"
+import { latestVersion, packageExists, publishPlaceholder, versionExists, whoami } from "./lib/npm"
 import { formatPatchedVersion, parsePatchedVersion, resetToNewBase } from "./lib/version"
 
 const ROOT = path.resolve(import.meta.dir, "..")
@@ -138,7 +138,7 @@ async function bootstrapNewPackages(): Promise<boolean> {
         .filter((r) => r.exists)
         .map(async (r) => ({
           pkg: r.pkg,
-          isPlaceholder: await versionExists(r.pkg, "0.0.0-exmachina.0"),
+          isPlaceholder: (await latestVersion(r.pkg)) === "0.0.0-exmachina.0",
         })),
     )
     for (const c of checks) {
