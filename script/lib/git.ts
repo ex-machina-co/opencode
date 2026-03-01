@@ -2,7 +2,7 @@
  * Git operation helpers for sync script
  */
 
-import { $ } from 'bun'
+import { $ } from "bun"
 
 export async function getCurrentBranch(): Promise<string> {
   const result = await $`git branch --show-current`.quiet()
@@ -21,13 +21,12 @@ export async function resetHardTo(ref: string): Promise<void> {
   await $`git reset --hard ${ref}`.quiet()
 }
 
-export async function push(remote: string, branch: string, options?: Partial<Record<'tags' | 'noVerify', boolean>>): Promise<void> {
-  await $`git push ${remote} ${branch} ${options?.tags ? '--tags' : ''} ${options?.noVerify ? '--no-verify' : ''}`
-}
-
-export async function mergeFastForwardOnly(branch: string): Promise<void> {
-  // This will throw if fast-forward is not possible
-  await $`git merge --ff-only ${branch}`.quiet()
+export async function push(
+  remote: string,
+  branch: string,
+  options?: Partial<Record<"tags" | "noVerify", boolean>>,
+): Promise<void> {
+  await $`git push ${remote} ${branch} ${options?.tags ? "--tags" : ""} ${options?.noVerify ? "--no-verify" : ""}`
 }
 
 export async function merge(branch: string): Promise<void> {
