@@ -6,6 +6,7 @@
 
 import path from "node:path"
 import { parsePatchedVersion, formatPatchedVersion, bumpPatch } from "./lib/version"
+import { io } from "./lib/io"
 
 const ROOT = path.resolve(import.meta.dirname, "..")
 const PATCHED_VERSION_FILE = path.join(ROOT, "PATCHED_VERSION")
@@ -37,5 +38,7 @@ if (!dry) {
     process.exit(1)
   }
 }
+
+await io.rm(path.join(ROOT, "packages/opencode/dist"))
 
 log("Done!")
