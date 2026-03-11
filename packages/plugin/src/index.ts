@@ -13,10 +13,10 @@ import type {
   Part,
 } from "@opencode-ai/sdk/v2"
 
-import type { BunShell } from "./shell"
-import { type ToolDefinition } from "./tool"
+import type { BunShell } from "./shell.js"
+import { type ToolDefinition } from "./tool.js"
 
-export * from "./tool"
+export * from "./tool.js"
 
 export type ProviderContext = {
   source: "env" | "config" | "custom" | "api"
