@@ -1,7 +1,7 @@
 import { mock, spyOn } from "bun:test"
 import { io } from "./io"
 
-export const FAKE_VERSION = "1.2.15-exmachina.1"
+export const FAKE_VERSION = "1.2.15001"
 export const FAKE_PACKAGES = [
   "@ex-machina/opencode-sdk",
   "@ex-machina/opencode-plugin",

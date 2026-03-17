@@ -51,7 +51,7 @@ export async function publishPlaceholder(pkg: string) {
     JSON.stringify(
       {
         name: pkg,
-        version: "0.0.0-exmachina.0",
+        version: "0.0.1",
         description: "Placeholder for OIDC trusted publishing bootstrap",
       },
       null,

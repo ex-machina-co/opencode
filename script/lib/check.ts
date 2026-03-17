@@ -13,16 +13,15 @@ function prompt(question: string): Promise<string> {
 }
 
 export async function check(root: string, opts?: { skipTests?: boolean }) {
-  const cwd = path.join(root, "packages/opencode")
   console.log("   Running typecheck...")
-  await $`bun run typecheck`.cwd(cwd)
+  await $`bun run turbo typecheck`.cwd(root)
   if (opts?.skipTests) {
     console.log("   Skipping tests (--skip-tests)")
     return
   }
   console.log("   Running tests...")
   try {
-    await $`bun test --timeout 30000`.cwd(cwd)
+    await $`bun run turbo test`.cwd(root)
   } catch {
     const answer = await prompt("\n   Tests failed. Continue anyway? [y/N] ")
     if (answer !== "y" && answer !== "yes") throw new Error("Tests failed")

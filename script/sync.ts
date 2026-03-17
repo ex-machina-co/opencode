@@ -12,7 +12,7 @@
  *   a. Builds CLI to discover platform targets, checks npm for new packages.
  *   b. If new packages found: publishes placeholders, prints OIDC setup
         instructions, and exits. Re-run after configuring OIDC.
- * 4. If upstream version changed, bumps PATCHED_VERSION to {newVersion}-exmachina.1
+ * 4. If upstream version changed, bumps PATCHED_VERSION to {newVersion * 1000 + 1}
  * 5. Commits and pushes main
  */
 
@@ -89,7 +89,7 @@ const DIST_DIR = path.join(ROOT, "packages/opencode/dist")
 async function buildAndDiscoverPackages(): Promise<string[]> {
   log("   Running build to discover platform targets (~30s)...")
   const { binaries } = await import("./build-patched-cli.ts")
-  // binaries is Record<string, string> e.g. { "@ex-machina/opencode-darwin-arm64": "1.2.15-exmachina.1" }
+  // binaries is Record<string, string> e.g. { "@ex-machina/opencode-darwin-arm64": "1.2.15001" }
   return [
     `${SCOPE}/opencode-sdk`,
     `${SCOPE}/opencode-plugin`,
@@ -140,7 +140,7 @@ async function bootstrapNewPackages(): Promise<boolean> {
         .filter((r) => r.exists)
         .map(async (r) => ({
           pkg: r.pkg,
-          isPlaceholder: (await latestVersion(r.pkg)) === "0.0.0-exmachina.0",
+          isPlaceholder: (await latestVersion(r.pkg)) === "0.0.1",
         })),
     )
     for (const c of checks) {
@@ -192,11 +192,11 @@ async function bootstrapNewPackages(): Promise<boolean> {
   for (const pkg of missing) {
     try {
       await publishPlaceholder(pkg)
-      log(`   + ${pkg}@0.0.0-exmachina.0`)
+      log(`   + ${pkg}@0.0.1`)
     } catch (err) {
       const msg = (err as Error).message
       if (msg.includes("previously published versions")) {
-        log(`   ~ ${pkg}@0.0.0-exmachina.0 (already published, skipping)`)
+        log(`   ~ ${pkg}@0.0.1 (already published, skipping)`)
         continue
       }
       console.error(`   x Failed to publish ${pkg}:`, msg)

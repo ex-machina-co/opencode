@@ -33,7 +33,7 @@ export async function main() {
             return
           }
         } catch {
-          // current latest isn't in exmachina format — promote anyway
+          // current latest uses old format or can't be compared — promote anyway
         }
       }
       await distTagAdd(pkg, PATCHED_VERSION, "latest")

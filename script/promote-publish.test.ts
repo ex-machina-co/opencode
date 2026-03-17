@@ -11,7 +11,7 @@ describe("promote-publish", () => {
     distTagSpy = spyOn(io, "distTagAdd").mockImplementation((() => Promise.resolve(shellResult())) as any)
     // Default: current latest is older than FAKE_VERSION so promotion proceeds
     viewDistTagSpy = spyOn(io, "viewDistTag").mockImplementation((() =>
-      Promise.resolve(shellResult("1.2.14-exmachina.1"))) as any)
+      Promise.resolve(shellResult("1.2.14001"))) as any)
   })
 
   afterEach(() => {
@@ -66,7 +66,7 @@ describe("promote-publish", () => {
 
   test("skips promotion when version is older than current latest", async () => {
     viewDistTagSpy = spyOn(io, "viewDistTag").mockImplementation((() =>
-      Promise.resolve(shellResult("1.2.15-exmachina.5"))) as any)
+      Promise.resolve(shellResult("1.2.15005"))) as any)
 
     const { main } = await import("./promote-publish")
     const code = await main()
@@ -75,8 +75,7 @@ describe("promote-publish", () => {
   })
 
   test("skips promotion when current latest has higher base version", async () => {
-    viewDistTagSpy = spyOn(io, "viewDistTag").mockImplementation((() =>
-      Promise.resolve(shellResult("1.3.0-exmachina.1"))) as any)
+    viewDistTagSpy = spyOn(io, "viewDistTag").mockImplementation((() => Promise.resolve(shellResult("1.3.1"))) as any)
 
     const { main } = await import("./promote-publish")
     const code = await main()
@@ -93,8 +92,9 @@ describe("promote-publish", () => {
     expect(distTagSpy).toHaveBeenCalledTimes(FAKE_PACKAGES.length)
   })
 
-  test("promotes when current latest is not in exmachina format", async () => {
-    viewDistTagSpy = spyOn(io, "viewDistTag").mockImplementation((() => Promise.resolve(shellResult("1.2.15"))) as any)
+  test("promotes when current latest uses old exmachina format", async () => {
+    viewDistTagSpy = spyOn(io, "viewDistTag").mockImplementation((() =>
+      Promise.resolve(shellResult("1.2.15-exmachina.1"))) as any)
 
     const { main } = await import("./promote-publish")
     const code = await main()
@@ -105,7 +105,7 @@ describe("promote-publish", () => {
   test("promotes only packages behind while skipping up-to-date ones", async () => {
     viewDistTagSpy = spyOn(io, "viewDistTag").mockImplementation(((pkg: string) => {
       // Most packages already at current version, one is behind
-      if (pkg === "@ex-machina/opencode-linux-arm64") return Promise.resolve(shellResult("1.2.14-exmachina.1"))
+      if (pkg === "@ex-machina/opencode-linux-arm64") return Promise.resolve(shellResult("1.2.14001"))
       return Promise.resolve(shellResult(FAKE_VERSION))
     }) as any)
 
@@ -118,7 +118,7 @@ describe("promote-publish", () => {
 
   test("promotes package with placeholder version", async () => {
     viewDistTagSpy = spyOn(io, "viewDistTag").mockImplementation(((pkg: string) => {
-      if (pkg === "@ex-machina/opencode-linux-arm64") return Promise.resolve(shellResult("0.0.0-exmachina.0"))
+      if (pkg === "@ex-machina/opencode-linux-arm64") return Promise.resolve(shellResult("0.0.1"))
       return Promise.resolve(shellResult(FAKE_VERSION))
     }) as any)
 
