@@ -28,7 +28,7 @@ describe("question.ask endpoint", () => {
       fn: async () => {
         // #given
         const session = await Session.create({})
-        const app = Server.App()
+        const app = Server.createApp({})
 
         // #when
         const ask = await app.request("/question/ask", {
@@ -60,7 +60,7 @@ describe("question.ask endpoint", () => {
         const nonExistentSessionID = "ses_nonexistent123"
 
         // #when
-        const app = Server.App()
+        const app = Server.createApp({})
         const response = await app.request("/question/ask", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -81,7 +81,7 @@ describe("question.ask endpoint", () => {
         const invalidSessionID = "invalid_session_id"
 
         // #when
-        const app = Server.App()
+        const app = Server.createApp({})
         const response = await app.request("/question/ask", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -109,7 +109,7 @@ describe("question.ask endpoint", () => {
         ]
 
         // #when
-        const app = Server.App()
+        const app = Server.createApp({})
         const response = await app.request("/question/ask", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
