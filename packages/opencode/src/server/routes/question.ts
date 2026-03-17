@@ -1,6 +1,7 @@
 import { Hono } from "hono"
 import { describeRoute, validator } from "hono-openapi"
 import { resolver } from "hono-openapi"
+import { QuestionID } from "@/question/schema"
 import { Question } from "../../question"
 import { Session } from "../../session"
 import z from "zod"
@@ -53,7 +54,7 @@ export const QuestionRoutes = lazy(() =>
       async (c) => {
         const json = c.req.valid("json")
         await Session.get(json.sessionID)
-        const id = await Question.ask(json, { awaitAnswers: false })
+        const id = await Question.askAsync(json)
         return c.json({ id })
       },
     )
@@ -78,7 +79,7 @@ export const QuestionRoutes = lazy(() =>
       validator(
         "param",
         z.object({
-          requestID: z.string(),
+          requestID: QuestionID.zod,
         }),
       ),
       validator("json", Question.Reply),
@@ -113,7 +114,7 @@ export const QuestionRoutes = lazy(() =>
       validator(
         "param",
         z.object({
-          requestID: z.string(),
+          requestID: QuestionID.zod,
         }),
       ),
       async (c) => {
