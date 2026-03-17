@@ -1,10 +1,26 @@
 import { $ } from "bun"
 import path from "path"
+import readline from "readline"
+
+function prompt(question: string): Promise<string> {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
+      rl.close()
+      resolve(answer.trim().toLowerCase())
+    })
+  })
+}
 
 export async function check(root: string) {
   const cwd = path.join(root, "packages/opencode")
   console.log("   Running typecheck...")
   await $`bun run typecheck`.cwd(cwd)
   console.log("   Running tests...")
-  await $`bun test --timeout 30000`.cwd(cwd)
+  try {
+    await $`bun test --timeout 30000`.cwd(cwd)
+  } catch {
+    const answer = await prompt("\n   Tests failed. Continue anyway? [y/N] ")
+    if (answer !== "y" && answer !== "yes") throw new Error("Tests failed")
+  }
 }
