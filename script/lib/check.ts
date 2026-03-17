@@ -12,10 +12,14 @@ function prompt(question: string): Promise<string> {
   })
 }
 
-export async function check(root: string) {
+export async function check(root: string, opts?: { skipTests?: boolean }) {
   const cwd = path.join(root, "packages/opencode")
   console.log("   Running typecheck...")
   await $`bun run typecheck`.cwd(cwd)
+  if (opts?.skipTests) {
+    console.log("   Skipping tests (--skip-tests)")
+    return
+  }
   console.log("   Running tests...")
   try {
     await $`bun test --timeout 30000`.cwd(cwd)

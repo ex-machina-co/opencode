@@ -12,6 +12,7 @@ import { check } from "./lib/check"
 const ROOT = path.resolve(import.meta.dirname, "..")
 const PATCHED_VERSION_FILE = path.join(ROOT, "PATCHED_VERSION")
 const dry = process.argv.includes("--dry-run")
+const skipTests = process.argv.includes("--skip-tests") || process.argv.includes("-S")
 
 const log = (msg: string) => console.log(dry ? `[DRY RUN] ${msg}` : msg)
 
@@ -24,7 +25,7 @@ log(`Bump: ${current} → ${bumped}`)
 log("Running typecheck and tests...")
 if (!dry) {
   try {
-    await check(ROOT)
+    await check(ROOT, { skipTests })
   } catch {
     console.error("Checks failed. Fix the issues before bumping.")
     process.exit(1)

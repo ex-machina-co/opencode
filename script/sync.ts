@@ -40,6 +40,7 @@ const PATCHED_VERSION_FILE = path.join(ROOT, "PATCHED_VERSION")
 const OPENCODE_PACKAGE_JSON = path.join(ROOT, "packages/opencode/package.json")
 
 const dryRun = process.argv.includes("--dry-run")
+const skipTests = process.argv.includes("--skip-tests") || process.argv.includes("-S")
 
 function log(msg: string) {
   console.log(msg)
@@ -273,7 +274,7 @@ async function main() {
   log("\n3.1. Running typecheck and tests...")
   if (!dryRun) {
     try {
-      await check(ROOT)
+      await check(ROOT, { skipTests })
     } catch {
       console.error("\nError: Checks failed after merge. Fix the issues before syncing.")
       process.exit(1)
