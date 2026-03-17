@@ -7,6 +7,7 @@
 import path from "node:path"
 import { parsePatchedVersion, formatPatchedVersion, bumpPatch } from "./lib/version"
 import { io } from "./lib/io"
+import { check } from "./lib/check"
 
 const ROOT = path.resolve(import.meta.dirname, "..")
 const PATCHED_VERSION_FILE = path.join(ROOT, "PATCHED_VERSION")
@@ -18,6 +19,18 @@ const log = (msg: string) => console.log(dry ? `[DRY RUN] ${msg}` : msg)
 const current = (await Bun.file(PATCHED_VERSION_FILE).text()).trim()
 const bumped = formatPatchedVersion(bumpPatch(parsePatchedVersion(current)))
 log(`Bump: ${current} → ${bumped}`)
+
+// 1.5. Run checks before bumping
+log("Running typecheck and tests...")
+if (!dry) {
+  try {
+    await check(ROOT)
+  } catch {
+    console.error("Checks failed. Fix the issues before bumping.")
+    process.exit(1)
+  }
+}
+log("Checks passed.")
 
 // 2. Write new version
 if (!dry) {

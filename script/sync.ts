@@ -32,6 +32,7 @@ import {
   writeFile,
 } from "./lib/git"
 import { latestVersion, packageExists, publishPlaceholder, versionExists, whoami } from "./lib/npm"
+import { check } from "./lib/check"
 import { formatPatchedVersion, parsePatchedVersion, resetToNewBase } from "./lib/version"
 
 const ROOT = path.resolve(import.meta.dir, "..")
@@ -267,6 +268,18 @@ async function main() {
     dryLog("Would merge dev into main")
   }
   log("   Done.")
+
+  // Step 3.1: Run checks
+  log("\n3.1. Running typecheck and tests...")
+  if (!dryRun) {
+    try {
+      await check(ROOT)
+    } catch {
+      console.error("\nError: Checks failed after merge. Fix the issues before syncing.")
+      process.exit(1)
+    }
+  }
+  log("   Checks passed.")
 
   // Step 3.5: Check for new platform targets and bootstrap if needed
   const shouldContinue = await bootstrapNewPackages()
