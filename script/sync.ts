@@ -194,7 +194,12 @@ async function bootstrapNewPackages(): Promise<boolean> {
       await publishPlaceholder(pkg)
       log(`   + ${pkg}@0.0.0-exmachina.0`)
     } catch (err) {
-      console.error(`   x Failed to publish ${pkg}:`, (err as Error).message)
+      const msg = (err as Error).message
+      if (msg.includes("previously published versions")) {
+        log(`   ~ ${pkg}@0.0.0-exmachina.0 (already published, skipping)`)
+        continue
+      }
+      console.error(`   x Failed to publish ${pkg}:`, msg)
       log("\n   Fix the error and re-run `bun sync`.")
       return false
     }

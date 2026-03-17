@@ -18,10 +18,14 @@ export const io = {
       cwd,
       stdin: "inherit",
       stdout: "inherit",
-      stderr: "inherit",
+      stderr: "pipe",
     })
-    return proc.exited.then((code) => {
-      if (code !== 0) throw new Error(`Failed with exit code ${code}`)
+    return proc.exited.then(async (code) => {
+      if (code !== 0) {
+        const stderr = await new Response(proc.stderr).text()
+        console.error(stderr)
+        throw new Error(stderr || `Failed with exit code ${code}`)
+      }
     })
   },
   viewDistTag: (pkg: string, tag: string) => $`npm view ${pkg}@${tag} version`.quiet(),
