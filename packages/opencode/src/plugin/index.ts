@@ -3,6 +3,8 @@ import { Config } from "../config/config"
 import { Bus } from "../bus"
 import { Log } from "../util/log"
 import { createOpencodeClient } from "@opencode-ai/sdk"
+import { createOpencodeClient as createV1Client } from "@opencode-ai/sdk"
+import { createOpencodeClient as createV2Client } from "@opencode-ai/sdk/v2"
 import { BunProc } from "../bun"
 import { Flag } from "../flag/flag"
 import { CodexAuthPlugin } from "./codex"
@@ -61,7 +63,7 @@ export namespace Plugin {
           yield* Effect.promise(async () => {
             const { Server } = await import("../server/server")
 
-            const client = createOpencodeClient({
+            const client = createV1Client({
               baseUrl: "http://localhost:4096",
               directory: ctx.directory,
               headers: Flag.OPENCODE_SERVER_PASSWORD
@@ -69,11 +71,24 @@ export namespace Plugin {
                     Authorization: `Basic ${Buffer.from(`${Flag.OPENCODE_SERVER_USERNAME ?? "opencode"}:${Flag.OPENCODE_SERVER_PASSWORD}`).toString("base64")}`,
                   }
                 : undefined,
+              // @ts-ignore - fetch type incompatibility
+              fetch: async (...args) => Server.Default().fetch(...args),
+            })
+            const clientNext = createV2Client({
+              baseUrl: "http://localhost:4096",
+              directory: ctx.directory,
+              headers: Flag.OPENCODE_SERVER_PASSWORD
+                ? {
+                    Authorization: `Basic ${Buffer.from(`${Flag.OPENCODE_SERVER_USERNAME ?? "opencode"}:${Flag.OPENCODE_SERVER_PASSWORD}`).toString("base64")}`,
+                  }
+                : undefined,
+              // @ts-ignore - fetch type incompatibility
               fetch: async (...args) => Server.Default().fetch(...args),
             })
             const cfg = await Config.get()
             const input: PluginInput = {
               client,
+              clientNext,
               project: ctx.project,
               worktree: ctx.worktree,
               directory: ctx.directory,
