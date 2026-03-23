@@ -26,7 +26,10 @@ export async function push(
   branch: string,
   options?: Partial<Record<"tags" | "noVerify", boolean>>,
 ): Promise<void> {
-  await $`git push ${remote} ${branch} ${options?.tags ? "--tags" : ""} ${options?.noVerify ? "--no-verify" : ""}`
+  const args: string[] = []
+  if (options?.tags) args.push("--tags")
+  if (options?.noVerify) args.push("--no-verify")
+  await $`git push ${remote} ${branch} ${args}`
 }
 
 export async function merge(branch: string): Promise<void> {
