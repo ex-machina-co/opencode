@@ -22,21 +22,15 @@ export namespace Plugin {
     hooks: Hooks[]
   }
 
-  // Hook names that follow the (input, output) => Promise<void> trigger pattern
-  type TriggerName = {
-    [K in keyof Hooks]-?: NonNullable<Hooks[K]> extends (input: any, output: any) => Promise<void> ? K : never
-  }[keyof Hooks]
+  type HookName = Exclude<keyof Hooks, "auth" | "event" | "tool" | "config">
+  type Params<Name extends HookName> = Parameters<Required<Hooks>[Name]>
 
   export interface Interface {
-    readonly trigger: <
-      Name extends TriggerName,
-      Input = Parameters<Required<Hooks>[Name]>[0],
-      Output = Parameters<Required<Hooks>[Name]>[1],
-    >(
+    readonly trigger: <Name extends HookName>(
       name: Name,
-      input: Input,
-      output: Output,
-    ) => Effect.Effect<Output>
+      input: Params<Name>[0],
+      output: Params<Name>[1],
+    ) => Effect.Effect<typeof output>
     readonly list: () => Effect.Effect<Hooks[]>
     readonly init: () => Effect.Effect<void>
   }
@@ -164,16 +158,16 @@ export namespace Plugin {
         }),
       )
 
-      const trigger = Effect.fn("Plugin.trigger")(function* <
-        Name extends TriggerName,
-        Input = Parameters<Required<Hooks>[Name]>[0],
-        Output = Parameters<Required<Hooks>[Name]>[1],
-      >(name: Name, input: Input, output: Output) {
+      const trigger = Effect.fn("Plugin.trigger")(function* <Name extends HookName>(
+        name: Name,
+        input: Params<Name>[0],
+        output: Params<Name>[1],
+      ) {
         if (!name) return output
         const state = yield* InstanceState.get(cache)
         yield* Effect.promise(async () => {
           for (const hook of state.hooks) {
-            const fn = hook[name] as any
+            const fn = hook[name] as Extract<Hooks[Name], (_input: typeof input, _output: typeof output) => any>
             if (!fn) continue
             await fn(input, output)
           }
@@ -197,11 +191,11 @@ export namespace Plugin {
   const defaultLayer = layer.pipe(Layer.provide(Bus.layer))
   const { runPromise } = makeRuntime(Service, defaultLayer)
 
-  export async function trigger<
-    Name extends TriggerName,
-    Input = Parameters<Required<Hooks>[Name]>[0],
-    Output = Parameters<Required<Hooks>[Name]>[1],
-  >(name: Name, input: Input, output: Output): Promise<Output> {
+  export async function trigger<Name extends HookName>(
+    name: Name,
+    input: Params<Name>[0],
+    output: Params<Name>[1],
+  ): Promise<typeof output> {
     return runPromise((svc) => svc.trigger(name, input, output))
   }
 
