@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test"
+import { afterEach, describe, expect, test } from "bun:test"
 import path from "path"
 import fs from "fs/promises"
 import { tmpdir } from "../fixture/fixture"
@@ -6,6 +6,10 @@ import { Instance } from "../../src/project/instance"
 import { ToolRegistry } from "../../src/tool/registry"
 import { Tool } from "../../src/tool/tool"
 import { Provider } from "../../src/provider/provider"
+
+afterEach(async () => {
+  await Instance.disposeAll()
+})
 
 describe("tool.registry", () => {
   test("loads tools from .opencode/tool (singular)", async () => {
