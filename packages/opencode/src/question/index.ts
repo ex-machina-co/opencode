@@ -47,6 +47,9 @@ export namespace Question {
     .meta({ ref: "QuestionRequest" })
   export type Request = z.infer<typeof Request>
 
+  export const AskInput = Request.omit({ id: true }).meta({ ref: "QuestionAskInput" })
+  export type AskInput = z.infer<typeof AskInput>
+
   export const Answer = z.array(z.string()).meta({ ref: "QuestionAnswer" })
   export type Answer = z.infer<typeof Answer>
 
@@ -99,6 +102,11 @@ export namespace Question {
       questions: Info[]
       tool?: { messageID: MessageID; callID: string }
     }) => Effect.Effect<Answer[], RejectedError>
+    readonly askAsync: (input: {
+      sessionID: SessionID
+      questions: Info[]
+      tool?: { messageID: MessageID; callID: string }
+    }) => Effect.Effect<QuestionID>
     readonly reply: (input: { requestID: QuestionID; answers: Answer[] }) => Effect.Effect<void>
     readonly reject: (requestID: QuestionID) => Effect.Effect<void>
     readonly list: () => Effect.Effect<Request[]>
@@ -155,6 +163,28 @@ export namespace Question {
         )
       })
 
+      const askAsync = Effect.fn("Question.askAsync")(function* (input: {
+        sessionID: SessionID
+        questions: Info[]
+        tool?: { messageID: MessageID; callID: string }
+      }) {
+        const pending = (yield* InstanceState.get(state)).pending
+        const id = QuestionID.ascending()
+        log.info("asking", { id, questions: input.questions.length })
+
+        const deferred = yield* Deferred.make<Answer[], RejectedError>()
+        const info: Request = {
+          id,
+          sessionID: input.sessionID,
+          questions: input.questions,
+          tool: input.tool,
+        }
+        pending.set(id, { info, deferred })
+        Bus.publish(Event.Asked, info)
+
+        return id
+      })
+
       const reply = Effect.fn("Question.reply")(function* (input: { requestID: QuestionID; answers: Answer[] }) {
         const pending = (yield* InstanceState.get(state)).pending
         const existing = pending.get(input.requestID)
@@ -193,7 +223,7 @@ export namespace Question {
         return Array.from(pending.values(), (x) => x.info)
       })
 
-      return Service.of({ ask, reply, reject, list })
+      return Service.of({ ask, askAsync, reply, reject, list })
     }),
   )
 
@@ -205,6 +235,14 @@ export namespace Question {
     tool?: { messageID: MessageID; callID: string }
   }): Promise<Answer[]> {
     return runPromise((s) => s.ask(input))
+  }
+
+  export async function askAsync(input: {
+    sessionID: SessionID
+    questions: Info[]
+    tool?: { messageID: MessageID; callID: string }
+  }): Promise<QuestionID> {
+    return runPromise((s) => s.askAsync(input))
   }
 
   export async function reply(input: { requestID: QuestionID; answers: Answer[] }) {

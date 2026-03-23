@@ -72,6 +72,36 @@ test("ask - adds to pending list", async () => {
   })
 })
 
+test("askAsync - returns ID without awaiting answers", async () => {
+  await using tmp = await tmpdir({ git: true })
+  await Instance.provide({
+    directory: tmp.path,
+    fn: async () => {
+      const questions = [
+        {
+          question: "What would you like to do?",
+          header: "Action",
+          options: [
+            { label: "Option 1", description: "First option" },
+            { label: "Option 2", description: "Second option" },
+          ],
+        },
+      ]
+
+      const id = await Question.askAsync({
+        sessionID: SessionID.make("ses_test"),
+        questions,
+      })
+
+      const pending = await Question.list()
+      expect(pending.length).toBe(1)
+      expect(pending[0].questions).toEqual(questions)
+      expect(pending[0].id).toBe(id)
+      await rejectAll()
+    },
+  })
+})
+
 // reply tests
 
 test("reply - resolves the pending ask with answers", async () => {

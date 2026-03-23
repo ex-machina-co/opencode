@@ -1,7 +1,8 @@
-import { describe, expect, mock, test } from "bun:test"
+import { afterAll, describe, expect, mock, test } from "bun:test"
 import fs from "fs/promises"
 import path from "path"
 import { tmpdir } from "../../fixture/fixture"
+import { Instance } from "../../../src/project/instance"
 
 const stop = new Error("stop")
 const seen = {
@@ -82,6 +83,12 @@ mock.module("@/project/instance", () => ({
     },
   },
 }))
+
+// Restore the real Instance module after tests complete so the mock
+// does not leak into other test files (workaround for oven-sh/bun#12823).
+afterAll(() => {
+  mock.module("@/project/instance", () => ({ Instance }))
+})
 
 describe("tui thread", () => {
   async function call(project?: string) {
