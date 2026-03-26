@@ -81,7 +81,7 @@ export namespace Plugin {
                     Authorization: `Basic ${Buffer.from(`${Flag.OPENCODE_SERVER_USERNAME ?? "opencode"}:${Flag.OPENCODE_SERVER_PASSWORD}`).toString("base64")}`,
                   }
                 : undefined,
-              // @ts-ignore - fetch type incompatibility
+              // @ts-expect-error v2 SDK types `fetch` as `typeof fetch` which includes Bun's static `preconnect` property and the (RequestInfo|URL, RequestInit?) overload; Hono's .fetch() only accepts Request — functionally compatible at runtime
               fetch: async (...args) => Server.Default().fetch(...args),
             })
             const cfg = await Config.get()
