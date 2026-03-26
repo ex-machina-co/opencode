@@ -15,34 +15,9 @@ describe("plugin.sdk-clients", () => {
       init: async (dir) => {
         const pluginDir = path.join(dir, ".opencode", "plugin")
         await fs.mkdir(pluginDir, { recursive: true })
-        await Bun.write(
+        await fs.copyFile(
+          path.join(import.meta.dir, "fixtures", "check-clients.ts"),
           path.join(pluginDir, "check-clients.ts"),
-          [
-            "export default async (input) => {",
-            "  const v1 = await input.client.session.list()",
-            "  const v2 = await input.clientNext.session.list()",
-            "  return {",
-            "    tool: {",
-            '      "test.check-v1": {',
-            '        description: "reports v1 client result",',
-            "        args: {},",
-            "        execute: async () => JSON.stringify({",
-            "          ok: v1.response.ok,",
-            "          data: v1.data,",
-            "        }),",
-            "      },",
-            '      "test.check-v2": {',
-            '        description: "reports v2 client result",',
-            "        args: {},",
-            "        execute: async () => JSON.stringify({",
-            "          ok: v2.response.ok,",
-            "          data: v2.data,",
-            "        }),",
-            "      },",
-            "    },",
-            "  }",
-            "}",
-          ].join("\n"),
         )
       },
     })
